@@ -1,0 +1,9 @@
+[submodule "src/simple-chatgpt"]
+	path = src/simple-chatgpt
+	url = https://github.com/frkr/simple-chatgpt.git
+[submodule "src/util-js"]
+	path = src/util-js
+	url = https://github.com/frkr/util-js.git
+[submodule "src/whatsapp-ts"]
+	path = src/whatsapp-ts
+	url = https://github.com/frkr/whatsapp-ts.git

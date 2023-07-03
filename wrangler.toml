@@ -1,0 +1,27 @@
+name = "mercury"
+main = "src/index.ts"
+compatibility_date = "2023-07-03"
+###
+usage_model = "unbound"
+workers_dev = true
+
+services = [
+    { binding = "GRGPT", service = "grgpt" }
+]
+
+[durable_objects]
+bindings = [{ name = "WAID", class_name = "WAID" }]
+
+[[migrations]]
+tag = "v1" # Should be unique for each entry
+new_classes = ["WAID"]
+
+#[vars]
+#W_API_KEY = "WhatsApp API Key"
+#META_VERIFY = "uuid for meta verification"
+#CELL_DEMO = "Id do celular demo"
+#IDEIAS_CASA = "Id do celular principal"
+#OPENAI_API_KEY = "Chave da openai"
+#AWS_KEY_ID = "chave da amazon"
+#AWS_KEY_ACC = "chave da amazon"
+#AWS_REGION = "regiao da amazon"

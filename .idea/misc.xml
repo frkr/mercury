@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="FindBugs-IDEA">
+    <plugins>
+      <plugin id="com.h3xstream.findsecbugs" enabled="true" bundled="true" />
+    </plugins>
+  </component>
+  <component name="FindBugs-IDEA-Workspace">
+    <analyzeAfterCompile>true</analyzeAfterCompile>
+    <analyzeAfterAutoMake>true</analyzeAfterAutoMake>
+    <runInBackground>true</runInBackground>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/out" />
+  </component>
+  <component name="ReaderModeSettings">
+    <option name="increaseLineSpacing" value="true" />
+    <option name="showWarnings" value="true" />
+  </component>
+</project>
