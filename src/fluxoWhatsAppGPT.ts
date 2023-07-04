@@ -232,9 +232,13 @@ export default class {
         }
 
         for (const snap of genmq) {
-            await this.awsClient().send(new DeleteInstanceSnapshotCommand({
-                instanceSnapshotName: snap
-            }))
+            try {
+                await this.awsClient().send(new DeleteInstanceSnapshotCommand({
+                    instanceSnapshotName: snap
+                }))
+            } catch (e) {
+                await sendMessageMultiPart(this.telefone, "_" + e + ": " + snap + "_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
+            }
         }
 
         if (genmq.length > 0) {
