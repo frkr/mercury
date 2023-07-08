@@ -51,7 +51,6 @@ export default class {
 
     async fluxo() {
         try {
-
             if (
                 this.request.method === 'POST'
                 && this.request.cf.asOrganization === "Facebook" // Cloudflare
@@ -93,7 +92,7 @@ export default class {
                     }
                 } else {
                     //TODO outros tipos de msg
-                    //console.log("Mensagem nao suportada: ", JSON.stringify(this.data, null, 2));
+                    // console.log("Mensagem nao suportada: ", JSON.stringify(this.data, null, 2));
                 }
 
             } else {
