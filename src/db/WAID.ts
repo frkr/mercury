@@ -26,8 +26,11 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <https://unlicense.org>
  */
 
+const versao = "v2";
+
 export interface DatabaseDO {
     key: string,
+    versao: string,
     whatsappUser?: string,
 
     chat?: MessageChat[],
@@ -52,6 +55,7 @@ export class WAID {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
         let def: DatabaseDO = {
             key: "",
+            versao: versao,
         }
         try {
             if (request.url.indexOf("mundial.workers.dev") != -1) {
@@ -72,9 +76,10 @@ export class WAID {
                         } catch (e) {
                         }
 
-                        if (!store || !store.key) {
+                        if (!store || !store.versao || store.versao !== versao) {
                             def = {
                                 key: key,
+                                versao: versao,
                             }
                             await this.state.storage.put(key, def);
                         } else {
@@ -87,10 +92,11 @@ export class WAID {
                     let data: PayloadDO = await request.json();
 
                     let store: DatabaseDO = await this.state.storage.get(data.key);
-                    if (!store || !store.key) {
+                    if (!store || !store.versao || store.versao !== versao) {
 
                         store = {
                             key: data.key,
+                            versao: versao,
                         }
 
                     }
