@@ -74,7 +74,6 @@ export default class {
                         this.documento = await this.dao.patch(this.telefone, "chat", {
                             role: "user",
                             content: this.prompt,
-                            name: this.whatsappUser,
                         } as MessageChat);
 
                         await this.debug();
