@@ -42,6 +42,10 @@ export default class DurableObjectService {
         this.dao = duobj.get(duobj.idFromName(id));
     }
 
+    async all(): Promise<any> {
+        return await (await this.dao.fetch(new Request(`${this.url}all`))).json();
+    }
+
     async get(key: string): Promise<DatabaseDO> {
         return await (await this.dao.fetch(new Request(`${this.url}${key}`))).json();
     }

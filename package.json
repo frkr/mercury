@@ -1,6 +1,6 @@
 {
   "name": "mercury",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Mercury Webhook",
   "private": true,
   "scripts": {
@@ -16,7 +16,6 @@
     "wrangler": "latest"
   },
   "dependencies": {
-    "@aws-sdk/client-lightsail": "^3.328.0",
-    "checksum": "^1.0.0"
+    "@aws-sdk/client-lightsail": "^3.328.0"
   }
 }

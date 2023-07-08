@@ -20,7 +20,7 @@ export default {
         try {
             return new fluxoWhatsAppGPT(request, data, env).fluxo();
         } catch (e) {
-            console.error("index", e, e.stack);
+            console.error("mercury", e, e.stack);
         }
     }
 }

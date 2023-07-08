@@ -25,18 +25,12 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <https://unlicense.org>
  */
+
 export interface DatabaseDO {
     key: string,
-    stamp: number,
-    msgDia: string[],
+    whatsappUser?: string,
 
-    identificado: boolean,
-    idMsg?: string,
     chat?: MessageChat[],
-    chatID?: string,
-
-    nome?: string,
-
 }
 
 export interface PayloadDO {
@@ -58,9 +52,6 @@ export class WAID {
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
         let def: DatabaseDO = {
             key: "",
-            msgDia: [],
-            stamp: 1,
-            identificado: false,
         }
         try {
             if (request.url.indexOf("mundial.workers.dev") != -1) {
@@ -69,22 +60,26 @@ export class WAID {
                     let url = new URL(request.url);
                     let key = url.pathname.split("/").pop();
 
-                    let store: DatabaseDO = null;
-                    try {
-                        store = await this.state.storage.get(key);
-                    } catch (e) {
-                    }
+                    if (key === "all") {
 
-                    if (!store || !store.msgDia) {
-                        def = {
-                            key: key,
-                            msgDia: [],
-                            stamp: 1,
-                            identificado: false,
-                        }
-                        await this.state.storage.put(key, def);
+                        return new Response(JSON.stringify(await this.state.storage.get("all")), {status: 200});
+
                     } else {
-                        def = store;
+
+                        let store: DatabaseDO = null;
+                        try {
+                            store = await this.state.storage.get(key);
+                        } catch (e) {
+                        }
+
+                        if (!store || !store.key) {
+                            def = {
+                                key: key,
+                            }
+                            await this.state.storage.put(key, def);
+                        } else {
+                            def = store;
+                        }
                     }
 
                 } else if (request.method === "POST") {
@@ -92,13 +87,10 @@ export class WAID {
                     let data: PayloadDO = await request.json();
 
                     let store: DatabaseDO = await this.state.storage.get(data.key);
-                    if (!store || !store.msgDia) {
+                    if (!store || !store.key) {
 
                         store = {
                             key: data.key,
-                            msgDia: [],
-                            stamp: 1,
-                            identificado: false,
                         }
 
                     }
@@ -117,12 +109,12 @@ export class WAID {
 
                         store[data.field].push(data.document);
 
-                        if (store[data.field].length > 100) {
-                            store[data.field] = store[data.field].slice(-50);
+                        if (store[data.field].length > 500) {
+                            store[data.field] = store[data.field].slice(-200);
                         }
                         if (data.field === 'chat') {
                             let simpleCount = JSON.stringify(store[data.field]).length;
-                            while (simpleCount > (12288)) {
+                            while (simpleCount > (30720)) {
                                 store[data.field].shift();
                                 simpleCount = JSON.stringify(store[data.field]).length;
                             }
@@ -143,9 +135,6 @@ export class WAID {
                         return new Response(JSON.stringify(
                             {
                                 key: data.key,
-                                msgDia: [],
-                                stamp: 1,
-                                identificado: false,
                             } as DatabaseDO
                         ), {status: 200});
 
@@ -153,11 +142,19 @@ export class WAID {
 
                     await this.state.storage.put(data.key, store);
 
+                    let all = await this.state.storage.get("all");
+                    if (!all) {
+                        all = {}
+                    }
+                    all[data.key] = store.whatsappUser;
+
+                    await this.state.storage.put("all", all);
+
                     def = store;
                 }
             }
         } catch (error) {
-            console.log("UserDoc", error, error.stack);
+            console.error("UserDoc", error, error.stack);
         }
         return new Response(JSON.stringify(def), {status: 200});
     }

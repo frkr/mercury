@@ -42,11 +42,12 @@ export default class {
         this.whatsappUser = this.data.entry[0].changes[0].value.contacts[0].profile.name;
     }
 
-    //endregion
-
     async provisionarIdentificacao() {
-        this.documento = await this.dao.verify(this.telefone, "nome", this.whatsappUser);
+        // TODO usar outra campo
+        this.documento = await this.dao.verify(this.telefone, "whatsappUser", this.whatsappUser);
     }
+
+    //endregion
 
     async fluxo() {
         try {
@@ -68,13 +69,13 @@ export default class {
                     await this.provisionarIdentificacao();
 
                     if (this.tipoMsg === "text") {
-                        this.documento = await this.dao.put(this.telefone, "idMsg", this.whatsappMessageId);
 
                         this.prompt = this.data.entry[0].changes[0].value.messages[0].text.body;
 
                         this.documento = await this.dao.patch(this.telefone, "chat", {
                             role: "user",
-                            content: this.prompt
+                            content: this.prompt,
+                            name: this.whatsappUser,
                         } as MessageChat);
 
                         await this.debug();
@@ -99,7 +100,7 @@ export default class {
                 return challenge(this.request, this.env.META_VERIFY);
             }
         } catch (e) {
-            console.error("mercury: ", e, e.stack);
+            console.error("Fluxo WhatsApp: ", e, e.stack);
         }
         return new Response(JSON.stringify(this.data), {status: 200});
     }
@@ -124,7 +125,7 @@ export default class {
         let reposta: MessageChat = await chat(this.telefone, this.documento.chat, this.env.OPENAI_API_KEY);
 
         if (reposta !== null) {
-            await readMessage(this.documento.idMsg, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+            await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
             await this.dao.patch(this.telefone, "chat", reposta);
             await sendMessageMultiPart(this.telefone, reposta.content, this.env.IDEIAS_CASA, this.env.W_API_KEY);
         }
@@ -138,9 +139,10 @@ export default class {
         // });
     }
 
+    //region Debug
     async debug() {
         this.retornoDebug = this.prompt;
-        if (telefones.find(t => t === this.telefone)) {
+        if (amazon.find(t => t === this.telefone)) {
 
             if (this.prompt.toLowerCase() === "debug") {
 
@@ -155,7 +157,7 @@ export default class {
                 await sendMessageMultiPart(this.telefone, "_DEBUG iniciado_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
                 await this.sendDebug();
 
-                await readMessage(this.documento.idMsg, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
 
             } else if (this.documento.chat[0]?.content === "debug") {
 
@@ -189,7 +191,7 @@ export default class {
                     this.retornoDebug = "error";
                     await sendMessageMultiPart(this.telefone, "_DEBUG Mensagem não entregue_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
                 }
-                await readMessage(this.documento.idMsg, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
 
             }
         }
@@ -254,4 +256,5 @@ export default class {
         await sendMessageMultiPart(this.telefone, "*gen*\n\n*genc*  _Apagar snapshots_\n\n*dev*\n\n*?*\n\n*exit*", this.env.IDEIAS_CASA, this.env.W_API_KEY);
     }
 
+    //endregion
 }
