@@ -121,7 +121,12 @@ export default class {
     }
 
     async gpt() {
-        let reposta: MessageChat = await chat(this.telefone, this.documento.chat, this.env.OPENAI_API_KEY);
+
+        let reposta: MessageChat = await chat(
+            this.telefone,
+            (poc_gpt.find(t => t === this.telefone) ? [{} as MessageChat].concat(this.documento.chat) : this.documento.chat),
+            this.env.OPENAI_API_KEY
+        );
 
         if (reposta !== null) {
             await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
