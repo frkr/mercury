@@ -4,6 +4,7 @@ import DurableObjectService from "./db/DurableObjectService";
 import {chat} from "./simple-chatgpt/chatgpt";
 import {DeleteInstanceSnapshotCommand, GetInstanceSnapshotsCommand, LightsailClient} from "@aws-sdk/client-lightsail";
 import {DatabaseDO} from "./db/WAID";
+import {treino} from "./treino";
 
 //region Constants
 const amazon = [];
@@ -126,22 +127,23 @@ export default class {
             cellface = this.data.entry[0].changes[0].value.metadata.phone_number_id === this.env.CELL_FACEBOOK;
         } catch (e) {
         }
-        let poc = poc_gpt.includes(this.telefone) || cellface;
+        let poc1 = poc_gptr.includes(this.telefone);
+        let poc2 = poc_gptfr.includes(this.telefone);
+        let poc = poc1 || poc2;
 
         let reposta: MessageChat = await chat(
             this.telefone,
-            (poc_gpt.find(t => t === this.telefone) ? [{} as MessageChat].concat(this.documento.chat) : this.documento.chat),
+            treino(this.documento.chat, poc1, poc2),
             this.env.OPENAI_API_KEY
         );
 
         if (reposta !== null) {
             await readMessage(this.whatsappMessageId, (cellface ? this.env.CELL_FACEBOOK : this.env.IDEIAS_CASA), this.env.W_API_KEY);
             await this.dao.patch(this.telefone, "chat", reposta);
-            await sendMessageMultiPart(this.telefone, reposta.content, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+            await sendMessageMultiPart(this.telefone, ((!cellface && poc) ? "_*ChatGPT:*_\n" : "") + reposta.content, (cellface ? this.env.CELL_FACEBOOK : this.env.IDEIAS_CASA), this.env.W_API_KEY);
+        } else if (cellface || poc) {
+            await sendMessageMultiPart(this.telefone, "_*ChatGPT: Mensagem não entregue*_", (cellface ? this.env.CELL_FACEBOOK : this.env.IDEIAS_CASA), this.env.W_API_KEY);
         }
-        // else {
-        //     await sendMessageMultiPart(this.telefone, "_ChatGPT: Mensagem não entregue_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
-        // }
         //TODO analitcs
         // this.env.MERCURY.writeDataPoint({
         //     indexes: [telefone],
