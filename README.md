@@ -18,10 +18,12 @@ git submodule update --recursive --remote
 echo VALUE | wrangler secret put W_API_KEY
 echo VALUE | wrangler secret put META_VERIFY
 echo VALUE | wrangler secret put CELL_DEMO
+echo VALUE | wrangler secret put CELL_FACEBOOK
 echo VALUE | wrangler secret put IDEIAS_CASA
 echo VALUE | wrangler secret put OPENAI_API_KEY
 echo VALUE | wrangler secret put AWS_KEY_ID
 echo VALUE | wrangler secret put AWS_KEY_ACC
 echo VALUE | wrangler secret put AWS_REGION
+
 
 ```

@@ -121,6 +121,13 @@ export default class {
 
     async gpt() {
 
+        let cellface = false;
+        try {
+            cellface = this.data.entry[0].changes[0].value.metadata.phone_number_id === this.env.CELL_FACEBOOK;
+        } catch (e) {
+        }
+        let poc = poc_gpt.includes(this.telefone) || cellface;
+
         let reposta: MessageChat = await chat(
             this.telefone,
             (poc_gpt.find(t => t === this.telefone) ? [{} as MessageChat].concat(this.documento.chat) : this.documento.chat),
@@ -128,7 +135,7 @@ export default class {
         );
 
         if (reposta !== null) {
-            await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+            await readMessage(this.whatsappMessageId, (cellface ? this.env.CELL_FACEBOOK : this.env.IDEIAS_CASA), this.env.W_API_KEY);
             await this.dao.patch(this.telefone, "chat", reposta);
             await sendMessageMultiPart(this.telefone, reposta.content, this.env.IDEIAS_CASA, this.env.W_API_KEY);
         }
@@ -145,7 +152,7 @@ export default class {
     //region Debug
     async debug() {
         this.retornoDebug = this.prompt;
-        if (amazon.find(t => t === this.telefone)) {
+        if (amazon.includes(this.telefone)) {
 
             if (this.prompt.toLowerCase() === "debug") {
 
