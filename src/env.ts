@@ -14,7 +14,6 @@
 
 interface Env {
     WAID: DurableObjectNamespace
-    GRGPT: Fetcher;
 
     W_API_KEY: string
     META_VERIFY: string

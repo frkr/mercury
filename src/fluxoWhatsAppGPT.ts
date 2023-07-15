@@ -1,4 +1,4 @@
-import {fetchWithTimeout} from "./util-js/util";
+import {fetchWithTimeout, readRequestBody} from "./util-js/util";
 import {challenge, readMessage, sendMessage, sendMessageMultiPart, sendTemplate} from "./whatsapp-ts/src";
 import DurableObjectService from "./db/DurableObjectService";
 import {chat} from "./simple-chatgpt/chatgpt";
@@ -19,7 +19,7 @@ export default class {
     private readonly request: Request;
     private readonly env: Env;
     private readonly dao: DurableObjectService;
-    private readonly data: WhatsAppNotification;
+    private data: WhatsAppNotification;
     private telefone: string;
     private prompt: string;
     private tipoMsg: MessageTypes;
@@ -31,9 +31,8 @@ export default class {
     private retornoDebug: string;
     private awsConfig: LightsailClient = null;
 
-    constructor(request: Request, data, env: Env) {
+    constructor(request: Request, env: Env) {
         this.request = request;
-        this.data = data;
         this.env = env;
         this.dao = new DurableObjectService(request.url, 'whatsapp', this.env.WAID);
     }
@@ -53,10 +52,8 @@ export default class {
 
     async fluxo() {
         try {
-            if (
-                this.request.method === 'POST'
-                && this.request.cf.asOrganization === "Facebook" // Cloudflare
-            ) {
+            this.data = await readRequestBody(this.request);
+            if (this.request.method === 'POST') {
 
                 this.tipoMsg = null;
                 try {

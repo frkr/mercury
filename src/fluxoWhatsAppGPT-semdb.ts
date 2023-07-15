@@ -31,10 +31,7 @@ export default class {
         try {
             this.data = await readRequestBody(this.request);
 
-            if (
-                this.request.method === 'POST'
-                && this.request.cf.asOrganization === "Facebook" // Cloudflare
-            ) {
+            if (this.request.method === 'POST') {
 
                 this.tipoMsg = null;
                 try {

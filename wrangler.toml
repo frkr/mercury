@@ -4,11 +4,6 @@ compatibility_date = "2023-07-08"
 usage_model = "unbound" # formas de cobrança
 workers_dev = true
 
-### Serviço para redirecionar para outra demonstração
-services = [
-    { binding = "GRGPT", service = "grgpt" }
-]
-
 ### Banco
 [durable_objects]
 bindings = [{ name = "WAID", class_name = "WAID" }]
