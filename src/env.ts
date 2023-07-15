@@ -17,8 +17,6 @@ interface Env {
 
     W_API_KEY: string
     META_VERIFY: string
-    CELL_DEMO: string
-    CELL_FACEBOOK: string
     IDEIAS_CASA: string
     OPENAI_API_KEY: string
     AWS_KEY_ID: string

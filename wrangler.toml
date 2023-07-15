@@ -1,6 +1,6 @@
 name = "mercury"
 main = "src/index.ts"
-compatibility_date = "2023-07-08"
+compatibility_date = "2023-07-15"
 usage_model = "unbound" # formas de cobrança
 workers_dev = true
 
@@ -16,7 +16,6 @@ new_classes = ["WAID"]
 #W_API_KEY = "WhatsApp API Key"
 #META_VERIFY = "uuid for meta verification"
 #CELL_DEMO = "Id do celular demo"
-#CELL_FACEBOOK = "Id do celular demo"
 #IDEIAS_CASA = "Id do celular principal"
 #OPENAI_API_KEY = "Chave da openai"
 #AWS_KEY_ID = "chave da amazon"

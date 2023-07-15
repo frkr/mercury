@@ -1,15 +1,13 @@
 # Mercury Webhook
 
-## Setup
-
-### Submodules
+## Submodules
 
 ```shell
 git submodule init
 git submodule update --recursive --remote
 ```
 
-### Environment Variables
+## Environment Variables
 
 - https://developers.cloudflare.com/workers/platform/environment-variables/
 - [Wrangler](wrangler.toml)
@@ -17,8 +15,6 @@ git submodule update --recursive --remote
 ```shell
 echo VALUE | wrangler secret put W_API_KEY
 echo VALUE | wrangler secret put META_VERIFY
-echo VALUE | wrangler secret put CELL_DEMO
-echo VALUE | wrangler secret put CELL_FACEBOOK
 echo VALUE | wrangler secret put IDEIAS_CASA
 echo VALUE | wrangler secret put OPENAI_API_KEY
 echo VALUE | wrangler secret put AWS_KEY_ID

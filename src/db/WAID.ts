@@ -26,13 +26,13 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <https://unlicense.org>
  */
 
-const versao = "v2";
+const versao = "v7";
 
 export interface DatabaseDO {
     key: string,
     versao: string,
-    whatsappUser?: string,
 
+    whatsappUser?: string,
     chat?: MessageChat[],
 }
 
@@ -58,106 +58,105 @@ export class WAID {
             versao: versao,
         }
         try {
-            if (request.url.indexOf("mundial.workers.dev") != -1) {
-                if (request.method === "GET") {
+            if (request.method === "GET") {
 
-                    let url = new URL(request.url);
-                    let key = url.pathname.split("/").pop();
+                let url = new URL(request.url);
+                let key = url.pathname.split("/").pop();
 
-                    if (key === "all") {
+                if (key === "all") {
 
-                        return new Response(JSON.stringify(await this.state.storage.get("all")), {status: 200});
+                    return new Response(JSON.stringify(await this.state.storage.get("all")), {status: 200});
 
-                    } else {
+                } else {
 
-                        let store: DatabaseDO = null;
-                        try {
-                            store = await this.state.storage.get(key);
-                        } catch (e) {
-                        }
-
-                        if (!store || !store.versao || store.versao !== versao) {
-                            def = {
-                                key: key,
-                                versao: versao,
-                            }
-                            await this.state.storage.put(key, def);
-                        } else {
-                            def = store;
-                        }
+                    let store: DatabaseDO = null;
+                    try {
+                        store = await this.state.storage.get(key);
+                    } catch (e) {
                     }
 
-                } else if (request.method === "POST") {
-
-                    let data: PayloadDO = await request.json();
-
-                    let store: DatabaseDO = await this.state.storage.get(data.key);
                     if (!store || !store.versao || store.versao !== versao) {
-
-                        store = {
-                            key: data.key,
+                        def = {
+                            key: key,
                             versao: versao,
                         }
-
+                        await this.state.storage.put(key, def);
+                    } else {
+                        def = store;
                     }
-
-                    if (data.operation === "verify") {
-
-                        if (!store[data.field]) {
-                            store[data.field] = data.document;
-                        }
-
-                    } else if (data.operation === "patch") {
-
-                        if (!store[data.field] || !Array.isArray(store[data.field])) {
-                            store[data.field] = []
-                        }
-
-                        store[data.field].push(data.document);
-
-                        if (store[data.field].length > 500) {
-                            store[data.field] = store[data.field].slice(-200);
-                        }
-                        if (data.field === 'chat') {
-                            let simpleCount = JSON.stringify(store[data.field]).length;
-                            while (simpleCount > (30720)) {
-                                store[data.field].shift();
-                                simpleCount = JSON.stringify(store[data.field]).length;
-                            }
-                        }
-
-                    } else if (data.operation === "post") {
-
-                        store = data.document;
-
-                    } else if (data.operation === "put") {
-
-                        store[data.field] = data.document;
-
-                    } else if (data.operation === "delete") {
-
-                        await this.state.storage.delete(data.key);
-
-                        return new Response(JSON.stringify(
-                            {
-                                key: data.key,
-                            } as DatabaseDO
-                        ), {status: 200});
-
-                    }
-
-                    await this.state.storage.put(data.key, store);
-
-                    let all = await this.state.storage.get("all");
-                    if (!all) {
-                        all = {}
-                    }
-                    all[data.key] = store.whatsappUser;
-
-                    await this.state.storage.put("all", all);
-
-                    def = store;
                 }
+
+            } else if (request.method === "POST") {
+
+                let data: PayloadDO = await request.json();
+
+                let store: DatabaseDO = await this.state.storage.get(data.key);
+                if (!store || !store.versao || store.versao !== versao) {
+
+                    store = {
+                        key: data.key,
+                        versao: versao,
+                    }
+
+                }
+
+                if (data.operation === "verify") {
+
+                    if (!store[data.field]) {
+                        store[data.field] = data.document;
+                    }
+
+                } else if (data.operation === "patch") {
+
+                    if (!store[data.field] || !Array.isArray(store[data.field])) {
+                        store[data.field] = []
+                    }
+
+                    store[data.field].push(data.document);
+
+                    if (store[data.field].length > 500) {
+                        store[data.field] = store[data.field].slice(-200);
+                    }
+                    if (data.field === 'chat') {
+                        let simpleCount = JSON.stringify(store[data.field]).length;
+                        while (simpleCount > (30720)) {
+                            store[data.field].shift();
+                            simpleCount = JSON.stringify(store[data.field]).length;
+                        }
+                    }
+
+                } else if (data.operation === "post") {
+
+                    store = data.document;
+
+                } else if (data.operation === "put") {
+
+                    store[data.field] = data.document;
+
+                } else if (data.operation === "delete") {
+
+                    await this.state.storage.delete(data.key);
+
+                    return new Response(JSON.stringify(
+                        {
+                            key: data.key,
+                            versao: versao,
+                        } as DatabaseDO
+                    ), {status: 200});
+
+                }
+
+                await this.state.storage.put(data.key, store);
+
+                let all = await this.state.storage.get("all");
+                if (!all) {
+                    all = {}
+                }
+                all[data.key] = store.whatsappUser;
+
+                await this.state.storage.put("all", all);
+
+                def = store;
             }
         } catch (error) {
             console.error("UserDoc", error, error.stack);
