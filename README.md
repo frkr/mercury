@@ -27,3 +27,8 @@ echo VALUE | wrangler secret put AWS_REGION
 
 
 ```
+
+### TODO
+
+- https://developers.cloudflare.com/workers/platform/deploy-button/
+
