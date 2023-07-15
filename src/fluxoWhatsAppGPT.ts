@@ -8,7 +8,8 @@ import {treino} from "./treino";
 
 //region Constants
 const amazon = [];
-const poc_gpt = []
+const poc_gptr = [];
+const poc_gptfr = [];
 const status = "status_servidor";
 //endregion
 
