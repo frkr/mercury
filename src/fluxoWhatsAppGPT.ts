@@ -1,9 +1,10 @@
-import {fetchWithTimeout, readRequestBody} from "./util-js/util";
+import {fetchWithTimeout, JSON_HEADER, readRequestBody} from "./util-js/util";
 import {challenge, readMessage, sendMessage, sendMessageMultiPart, sendTemplate} from "./whatsapp-ts/src";
 import DurableObjectService from "./db/DurableObjectService";
 import {chat} from "./simple-chatgpt/chatgpt";
 import {DeleteInstanceSnapshotCommand, GetInstanceSnapshotsCommand, LightsailClient} from "@aws-sdk/client-lightsail";
 import {DatabaseDO} from "./db/WAID";
+import {WAAuth} from "./whatsapp-ts";
 
 //region Constants
 const amazon = [
@@ -18,6 +19,7 @@ export default class {
     private readonly request: Request;
     private readonly env: Env;
     private readonly dao: DurableObjectService;
+    private readonly wauth: WAAuth;
     private data: WhatsAppNotification;
     private telefone: string;
     private prompt: string;
@@ -34,6 +36,10 @@ export default class {
         this.request = request;
         this.env = env;
         this.dao = new DurableObjectService(request.url, 'whatsapp', this.env.WAID);
+        this.wauth = {
+            apikey: this.env.W_API_KEY,
+            accid: this.env.IDEIAS_CASA,
+        } as WAAuth;
     }
 
     boot() {
@@ -92,16 +98,17 @@ export default class {
                 }
 
             } else {
-                return challenge(this.request, this.env.META_VERIFY);
+                return challenge(this.env.META_VERIFY, this.request);
             }
         } catch (e) {
             console.error("Fluxo WhatsApp: ", e, e.stack);
         }
-        return new Response(JSON.stringify(this.data), {status: 200});
+        return new Response(JSON.stringify(this.data), {status: 200, headers: JSON_HEADER});
     }
 
     async imageMsg() {
         await sendMessage(
+            this.wauth,
             {
                 messaging_product: "whatsapp",
                 recipient_type: "individual",
@@ -111,19 +118,17 @@ export default class {
                     id: this.data.entry[0].changes[0].value.messages[0].image.id
                 }
             },
-            this.env.IDEIAS_CASA,
-            this.env.W_API_KEY
         );
     }
 
     async gpt() {
 
-        let reposta: MessageChat = await chat(this.telefone, this.documento.chat, this.env.OPENAI_API_KEY);
+        let resposta: MessageChat = await chat(this.telefone, this.documento.chat, this.env.OPENAI_API_KEY);
 
-        if (reposta !== null) {
-            await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
-            await this.dao.patch(this.telefone, "chat", reposta);
-            await sendMessageMultiPart(this.telefone, reposta.content, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+        if (resposta !== null) {
+            await readMessage(this.wauth, this.whatsappMessageId);
+            await this.dao.patch(this.telefone, "chat", resposta.content);
+            await sendMessageMultiPart(this.wauth, this.telefone, resposta.content);
         }
     }
 
@@ -142,10 +147,10 @@ export default class {
                         role: "system"
                     } as MessageChat
                 ]);
-                await sendMessageMultiPart(this.telefone, "_DEBUG iniciado_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                await sendMessageMultiPart(this.wauth, this.telefone, "_DEBUG iniciado_");
                 await this.sendDebug();
 
-                await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                await readMessage(this.wauth, this.whatsappMessageId);
 
             } else if (this.documento.chat[0]?.content === "debug") {
 
@@ -162,7 +167,7 @@ export default class {
                     } else {
                         this.retornoDebug = "FORA Genesis";
                     }
-                    await sendTemplate(status, this.telefone, this.retornoDebug, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                    await sendTemplate(this.wauth, status, this.telefone, this.retornoDebug);
                 } else if (this.prompt.toLowerCase() === "dev") {
                     let resp = await fetchWithTimeout(fetch("http://dev.abaccusapi.com.br:8080/actuator/health"))
                     if (resp !== null && resp.status === 200) {
@@ -170,16 +175,16 @@ export default class {
                     } else {
                         this.retornoDebug = "FORA Dev";
                     }
-                    await sendTemplate(status, this.telefone, this.retornoDebug, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                    await sendTemplate(this.wauth, status, this.telefone, this.retornoDebug);
                 } else if (this.prompt.toLowerCase() === "exit") {
                     await this.dao.delete(this.telefone);
 
-                    await sendMessageMultiPart(this.telefone, "_DEBUG finalizado_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                    await sendMessageMultiPart(this.wauth, this.telefone, "_DEBUG finalizado_");
                 } else {
                     this.retornoDebug = "error";
-                    await sendMessageMultiPart(this.telefone, "_DEBUG Mensagem não entregue_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                    await sendMessageMultiPart(this.wauth, this.telefone, "_DEBUG Mensagem não entregue_");
                 }
-                await readMessage(this.whatsappMessageId, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                await readMessage(this.wauth, this.whatsappMessageId);
 
             }
         }
@@ -221,7 +226,7 @@ export default class {
                     instanceSnapshotName: snap
                 }))
             } catch (e) {
-                await sendMessageMultiPart(this.telefone, "_" + e + ": " + snap + "_", this.env.IDEIAS_CASA, this.env.W_API_KEY);
+                await sendMessageMultiPart(this.wauth, this.telefone, "_" + e + ": " + snap + "_");
             }
         }
 
@@ -230,11 +235,11 @@ export default class {
         } else {
             this.retornoDebug = "_Não há Snapshots antigos_";
         }
-        await sendMessageMultiPart(this.telefone, this.retornoDebug, this.env.IDEIAS_CASA, this.env.W_API_KEY);
+        await sendMessageMultiPart(this.wauth, this.telefone, this.retornoDebug);
     }
 
     async sendDebug() {
-        await sendMessageMultiPart(this.telefone, "*gen*\n\n*genc*  _Apagar snapshots_\n\n*dev*\n\n*?*\n\n*exit*", this.env.IDEIAS_CASA, this.env.W_API_KEY);
+        await sendMessageMultiPart(this.wauth, this.telefone, "*gen*\n\n*genc*  _Apagar snapshots_\n\n*dev*\n\n*?*\n\n*exit*");
     }
 
     //endregion
