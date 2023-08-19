@@ -1,6 +1,6 @@
 {
   "name": "mercury",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "description": "Mercury Webhook",
   "private": true,
   "scripts": {
@@ -11,8 +11,8 @@
     "tail": "wrangler tail"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.x.x",
-    "typescript": "^5.0.x",
+    "@cloudflare/workers-types": "4.x.x",
+    "typescript": "5.0.x",
     "wrangler": "latest"
   },
   "dependencies": {

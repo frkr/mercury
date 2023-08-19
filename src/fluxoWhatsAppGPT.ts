@@ -6,9 +6,9 @@ import {DeleteInstanceSnapshotCommand, GetInstanceSnapshotsCommand, LightsailCli
 import {DatabaseDO} from "./db/WAID";
 
 //region Constants
-const amazon = [];
-const poc_gptr = [];
-const poc_gptfr = [];
+const amazon = [
+    "5511920044039"
+];
 const status = "status_servidor";
 //endregion
 

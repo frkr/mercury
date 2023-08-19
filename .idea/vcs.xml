@@ -7,7 +7,6 @@
     <option name="synchronizeBranchProtectionRules" value="false" />
   </component>
   <component name="VcsDirectoryMappings">
-    <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/simple-chatgpt" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/util-js" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/src/whatsapp-ts" vcs="Git" />
