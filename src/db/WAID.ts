@@ -26,7 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <https://unlicense.org>
  */
 
-const versao = "v9";
+const versao = "v2";
 
 export interface PayloadDO {
     key: string,

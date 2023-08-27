@@ -93,8 +93,7 @@ export default class {
 
                     }
                 } else {
-                    //TODO outros tipos de msg
-                    // console.log("Mensagem nao suportada: ", JSON.stringify(this.data, null, 2));
+                    await sendMessageMultiPart(this.wauth, this.telefone, "_Mensagem não suportada_");
                 }
 
             } else {
@@ -125,14 +124,12 @@ export default class {
 
         let resposta: MessageChat = await chat(this.telefone, this.documento.chat, this.env.OPENAI_API_KEY);
 
-        console.log("vars:",
-            JSON.stringify(this.env, null, 2),
-        )
-
         if (resposta !== null) {
-            console.log("resposta: ", resposta.content);
             await readMessage(this.wauth, this.whatsappMessageId);
-            await this.dao.patch(this.telefone, "chat", resposta.content);
+            await this.dao.patch(this.telefone, "chat", {
+                role: "assistant",
+                content: resposta.content,
+            } as MessageChat);
             await sendMessageMultiPart(this.wauth, this.telefone, resposta.content);
         }
     }

@@ -1,6 +1,6 @@
 name = "mercury"
 main = "src/index.ts"
-compatibility_date = "2023-07-16"
+compatibility_date = "2023-07-18"
 usage_model = "unbound" # formas de cobrança
 workers_dev = true
 account_id = "4f296275a5fa3d5c36343151790e96d3"
