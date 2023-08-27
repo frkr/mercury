@@ -26,15 +26,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <https://unlicense.org>
  */
 
-const versao = "v7";
-
-export interface DatabaseDO {
-    key: string,
-    versao: string,
-
-    whatsappUser?: string,
-    chat?: MessageChat[],
-}
+const versao = "v9";
 
 export interface PayloadDO {
     key: string,
@@ -53,7 +45,7 @@ export class WAID {
     }
 
     async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
-        let def: DatabaseDO = {
+        let def: any = {
             key: "",
             versao: versao,
         }
@@ -63,35 +55,28 @@ export class WAID {
                 let url = new URL(request.url);
                 let key = url.pathname.split("/").pop();
 
-                if (key === "all") {
+                let store = null;
+                try {
+                    store = await this.state.storage.get(key);
+                } catch (e) {
+                }
 
-                    return new Response(JSON.stringify(await this.state.storage.get("all")), {status: 200});
-
+                if (!store || !store.versao || store.versao !== versao) {
+                    def = {
+                        key: key,
+                        versao: versao,
+                    }
+                    await this.state.storage.put(key, def);
                 } else {
-
-                    let store: DatabaseDO = null;
-                    try {
-                        store = await this.state.storage.get(key);
-                    } catch (e) {
-                    }
-
-                    if (!store || !store.versao || store.versao !== versao) {
-                        def = {
-                            key: key,
-                            versao: versao,
-                        }
-                        await this.state.storage.put(key, def);
-                    } else {
-                        def = store;
-                    }
+                    def = store;
                 }
 
             } else if (request.method === "POST") {
 
                 let data: PayloadDO = await request.json();
 
-                let store: DatabaseDO = await this.state.storage.get(data.key);
-                if (!store || !store.versao || store.versao !== versao) {
+                let store = await this.state.storage.get(data.key);
+                if (!store || !store['versao'] || store['versao'] !== versao) {
 
                     store = {
                         key: data.key,
@@ -117,13 +102,6 @@ export class WAID {
                     if (store[data.field].length > 500) {
                         store[data.field] = store[data.field].slice(-200);
                     }
-                    if (data.field === 'chat') {
-                        let simpleCount = JSON.stringify(store[data.field]).length;
-                        while (simpleCount > (30720)) {
-                            store[data.field].shift();
-                            simpleCount = JSON.stringify(store[data.field]).length;
-                        }
-                    }
 
                 } else if (data.operation === "post") {
 
@@ -141,20 +119,12 @@ export class WAID {
                         {
                             key: data.key,
                             versao: versao,
-                        } as DatabaseDO
+                        }
                     ), {status: 200});
 
                 }
 
                 await this.state.storage.put(data.key, store);
-
-                let all = await this.state.storage.get("all");
-                if (!all) {
-                    all = {}
-                }
-                all[data.key] = store.whatsappUser;
-
-                await this.state.storage.put("all", all);
 
                 def = store;
             }

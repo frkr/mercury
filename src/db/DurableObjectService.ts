@@ -27,7 +27,8 @@ For more information, please refer to <https://unlicense.org>
  */
 
 import {DurableObjectStub} from "@cloudflare/workers-types";
-import {DatabaseDO, OperationDO, PayloadDO} from "./WAID";
+import {DatabaseDO} from "./DatabaseDO";
+import {OperationDO, PayloadDO} from "./WAID";
 
 export default class DurableObjectService {
     private readonly url: string;

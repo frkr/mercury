@@ -3,7 +3,7 @@ import {challenge, readMessage, sendMessage, sendMessageMultiPart, sendTemplate}
 import DurableObjectService from "./db/DurableObjectService";
 import {chat} from "./simple-chatgpt/chatgpt";
 import {DeleteInstanceSnapshotCommand, GetInstanceSnapshotsCommand, LightsailClient} from "@aws-sdk/client-lightsail";
-import {DatabaseDO} from "./db/WAID";
+import {DatabaseDO} from "./db/DatabaseDO";
 import {WAAuth} from "./whatsapp-ts";
 
 //region Constants
@@ -125,7 +125,12 @@ export default class {
 
         let resposta: MessageChat = await chat(this.telefone, this.documento.chat, this.env.OPENAI_API_KEY);
 
+        console.log("vars:",
+            JSON.stringify(this.env, null, 2),
+        )
+
         if (resposta !== null) {
+            console.log("resposta: ", resposta.content);
             await readMessage(this.wauth, this.whatsappMessageId);
             await this.dao.patch(this.telefone, "chat", resposta.content);
             await sendMessageMultiPart(this.wauth, this.telefone, resposta.content);
