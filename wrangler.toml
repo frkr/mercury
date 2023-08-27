@@ -3,6 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2023-07-15"
 usage_model = "unbound" # formas de cobrança
 workers_dev = true
+account_id = "4f296275a5fa3d5c36343151790e96d3"
 
 ### Banco
 [durable_objects]
