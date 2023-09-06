@@ -74,17 +74,23 @@ export default class {
 
                         this.prompt = this.data.entry[0].changes[0].value.messages[0].text.body;
 
-                        this.documento = await this.dao.patch(this.telefone, "chat", {
-                            role: "user",
-                            content: this.prompt,
-                        } as MessageChat);
+                        if (this.prompt === 'ping') {
 
-                        await this.debug();
+                                this.sendMessage({content: "pong", role: "system"}, false)
 
-                        if (this.proxFluxo) {
+                        } else {
+                            this.documento = await this.dao.patch(this.telefone, "chat", {
+                                role: "user",
+                                content: this.prompt,
+                            } as MessageChat);
 
-                            await this.gpt();
+                            await this.debug();
 
+                            if (this.proxFluxo) {
+
+                                await this.gpt();
+
+                            }
                         }
 
                     } else if (this.tipoMsg === "image") {
@@ -124,12 +130,18 @@ export default class {
 
         let resposta: MessageChat = await chat(this.telefone, this.documento.chat, this.env.OPENAI_API_KEY);
 
+        this.sendMessage(resposta);
+    }
+
+    async sendMessage(resposta: MessageChat, save = true) {
         if (resposta !== null) {
-            await readMessage(this.wauth, this.whatsappMessageId);
-            await this.dao.patch(this.telefone, "chat", {
-                role: "assistant",
-                content: resposta.content,
-            } as MessageChat);
+            if (save) {
+                await readMessage(this.wauth, this.whatsappMessageId);
+                await this.dao.patch(this.telefone, "chat", {
+                    role: "assistant",
+                    content: resposta.content,
+                } as MessageChat);
+            }
             await sendMessageMultiPart(this.wauth, this.telefone, resposta.content);
         }
     }
