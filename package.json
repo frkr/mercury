@@ -1,6 +1,6 @@
 {
   "name": "mercury",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "Mercury Webhook",
   "private": true,
   "scripts": {
@@ -13,9 +13,9 @@
   "devDependencies": {
     "@cloudflare/workers-types": "4.x.x",
     "typescript": "5.0.x",
-    "wrangler": "latest"
+    "wrangler": "3.6.x"
   },
   "dependencies": {
-    "@aws-sdk/client-lightsail": "^3.328.0"
+    "@aws-sdk/client-lightsail": "3.328.x"
   }
 }

@@ -137,12 +137,11 @@ export default class {
         if (resposta !== null) {
             if (save) {
                 await readMessage(this.wauth, this.whatsappMessageId);
-                await this.dao.patch(this.telefone, "chat", {
-                    role: "assistant",
-                    content: resposta.content,
-                } as MessageChat);
+                await this.dao.patch(this.telefone, "chat", resposta);
             }
             await sendMessageMultiPart(this.wauth, this.telefone, resposta.content);
+        } else {
+            await sendMessageMultiPart(this.wauth, this.telefone, '*_Mensagem não entregue_*');
         }
     }
 

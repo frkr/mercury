@@ -99,8 +99,8 @@ export class WAID {
 
                     store[data.field].push(data.document);
 
-                    if (store[data.field].length > 500) {
-                        store[data.field] = store[data.field].slice(-200);
+                    if (store[data.field].length > 100) {
+                        store[data.field] = store[data.field].slice(-50);
                     }
 
                 } else if (data.operation === "post") {
